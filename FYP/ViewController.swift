@@ -59,9 +59,12 @@ AVCaptureFileOutputRecordingDelegate
     @IBOutlet var magnetic_heading: UITextView!
     
     @IBOutlet var btn_start: UIButton!
-    @IBOutlet var btn_finish: UIButton!
+    
+    @IBOutlet var switch_show: UISwitch!
     
     @IBOutlet var label_recording: UILabel!
+    var timerObj: Timer!
+    
     var IS_RECORDING: Bool! = false
     
     var motionManager:CMMotionManager!
@@ -74,6 +77,28 @@ AVCaptureFileOutputRecordingDelegate
     var finishTimeStamp: Int!
     
     var err: NSError? = nil
+    
+    func hideNums() {
+        self.imu_motion_pitch.isHidden = true
+        self.imu_motion_roll.isHidden = true
+        self.imu_motion_yaw.isHidden = true
+        self.magnetic_heading.isHidden = true
+    }
+    
+    func showNums() {
+        self.imu_motion_pitch.isHidden = false
+        self.imu_motion_roll.isHidden = false
+        self.imu_motion_yaw.isHidden = false
+        self.magnetic_heading.isHidden = false
+    }
+    
+    @IBAction func switchFlipped(_ sender: Any) {
+        if (self.switch_show.isOn) {
+            showNums()
+        } else {
+            hideNums()
+        }
+    }
     
     // video part
     @IBOutlet var camView: UIView!
@@ -115,22 +140,20 @@ AVCaptureFileOutputRecordingDelegate
         self.camView.bringSubview(toFront: self.imu_motion_pitch)
         self.camView.bringSubview(toFront: self.magnetic_heading)
         self.camView.bringSubview(toFront: self.btn_start)
-        self.camView.bringSubview(toFront: self.btn_finish)
         self.camView.bringSubview(toFront: self.label_recording)
+        self.camView.bringSubview(toFront: self.switch_show)
+        
+        self.captureSession.addOutput(videoFileOutput)
     }
     
     func recordVideo() {
         let data_file = self.startDateTime + "video.mp4"
         
-        let recordDelegate:AVCaptureFileOutputRecordingDelegate? = self
-        
-        self.captureSession.addOutput(videoFileOutput)
-        
         if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
             
             let data_path = dir.appendingPathComponent(data_file)
             
-            videoFileOutput.startRecording(toOutputFileURL: data_path, recordingDelegate: recordDelegate)
+            videoFileOutput.startRecording(toOutputFileURL: data_path, recordingDelegate: self)
         }
     }
     
@@ -141,6 +164,10 @@ AVCaptureFileOutputRecordingDelegate
         // initialize IS_RECORDING and hide recording label
         self.IS_RECORDING = false
         self.label_recording.isHidden = true
+        
+        // default do not show the debug items
+        self.switch_show.setOn(false, animated: true)
+        hideNums()
         
         // camera starts refressing
         self.captureSession.startRunning()
@@ -227,23 +254,59 @@ AVCaptureFileOutputRecordingDelegate
         self.moveArr.append([x, y, z])
     }
     
+    func runTimedCode() {
+        let x = Int(self.label_recording.text!)
+        self.label_recording.text = String(x! + 1)
+    }
+    
     
     // start updates and record in array
     @IBAction func startRecording(_ sender: AnyObject) {
-        // toggle IS_RECORDING and recording label
-        self.IS_RECORDING = true
-        self.label_recording.isHidden = false
-        
-        // make sure previous data all removed
-        self.moveArr.removeAll()
-        self.startDateTime = Date().iso8601
-        self.startTimeStamp = Int(Date().timeIntervalSince1970)
-        
-        // start imu recording
-        self.startUpdates()
-        
-        // start videoRecording
-        self.recordVideo()
+        if (self.IS_RECORDING!) {
+            self.finishDateTime = Date().iso8601
+            self.finishTimeStamp = Int(Date().timeIntervalSince1970)
+            
+            // stop video recording
+            self.videoFileOutput.stopRecording()
+            
+            // stop imu updates
+            self.stopUpdates()
+            
+            // write to file, comment if testing functionality
+            self.writeToFile()
+            
+            // clear movedata after exporting
+            self.moveArr.removeAll()
+            
+            // stop timer
+            self.timerObj.invalidate()
+            // toggle button
+            self.btn_start.setTitle("Start", for: .normal)
+            self.btn_start.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+            // toggle IS_RECORDING and label
+            self.IS_RECORDING = false
+            self.label_recording.isHidden = true
+        } else {
+            // toggle IS_RECORDING and recording label
+            self.IS_RECORDING = true
+            self.label_recording.text = "0"
+            self.label_recording.isHidden = false
+            // toggle button
+            self.btn_start.setTitle("Finish", for: .normal)
+            self.btn_start.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.5)
+            self.timerObj = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(runTimedCode), userInfo: nil, repeats: true)
+            
+            // make sure previous data all removed
+            self.moveArr.removeAll()
+            self.startDateTime = Date().iso8601
+            self.startTimeStamp = Int(Date().timeIntervalSince1970)
+            
+            // start imu recording
+            self.startUpdates()
+            
+            // start videoRecording
+            self.recordVideo()
+        }
     }
     
     func prepCSV()-> String {
@@ -260,31 +323,7 @@ AVCaptureFileOutputRecordingDelegate
         }
         return str
     }
-    
-    // stop updates, export data and extra info to a pair of files, clear array
-    @IBAction func exportData(_ sender: AnyObject) {
-        if (self.IS_RECORDING!) {
-            self.finishDateTime = Date().iso8601
-            self.finishTimeStamp = Int(Date().timeIntervalSince1970)
-            
-            // stop video recording
-            self.videoFileOutput.stopRecording()
-            
-            // stop imu updates
-            self.stopUpdates()
-            
-            // write to file, comment if testing functionality
-            self.writeToFile()
-        
-            // clear movedata after exporting
-            self.moveArr.removeAll()
-            
-            // toggle IS_RECORDING and label
-            self.IS_RECORDING = false
-            self.label_recording.isHidden = true
-        }
-    }
-    
+ 
     // actually write data to appFiles
     func writeToFile() {
         let data_file = self.startDateTime + "X" + finishDateTime + "data.csv" //this is the data file.

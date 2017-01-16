@@ -13,3 +13,6 @@ Todo
 * Open FYP.xcodeproj using XCode
 * Connect you iOS device and choose the device at the selector near "Run" button
 * Run it on the device
+
+### Refs
+[Stackoverflow: How to record a video with avfoundation in Swift?](http://stackoverflow.com/questions/33249041/how-to-record-a-video-with-avfoundation-in-swift)

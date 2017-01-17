@@ -2,6 +2,11 @@
 
 For training data collection of the dogdebot.
 
+### Platform and Language
+* Swift 3
+* XCode 8
+* Test device: iOS 10, iPhone 6
+
 ### What does it do
 Records videos and the motion data, e.g. acceleration and orientation, of phone corresponding to the videos.
 

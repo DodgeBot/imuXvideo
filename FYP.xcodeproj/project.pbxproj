@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		38A853CF3E12F653B3580DFD /* Pods_FYP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A688C52E24BB2C1E7451A7D8 /* Pods_FYP.framework */; };
 		98CF7B671E23719F00B35553 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98CF7B661E23719F00B35553 /* AppDelegate.swift */; };
 		98CF7B691E23719F00B35553 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98CF7B681E23719F00B35553 /* ViewController.swift */; };
 		98CF7B6C1E23719F00B35553 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 98CF7B6A1E23719F00B35553 /* Main.storyboard */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		55B67097AACE2079F5825738 /* Pods-FYP.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FYP.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FYP/Pods-FYP.debug.xcconfig"; sourceTree = "<group>"; };
 		98CF7B631E23719F00B35553 /* FYP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FYP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98CF7B661E23719F00B35553 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		98CF7B681E23719F00B35553 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -22,6 +24,8 @@
 		98CF7B6D1E23719F00B35553 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		98CF7B701E23719F00B35553 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		98CF7B721E23719F00B35553 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A688C52E24BB2C1E7451A7D8 /* Pods_FYP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FYP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BAB4B71ABF290996F1AEC66D /* Pods-FYP.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FYP.release.xcconfig"; path = "Pods/Target Support Files/Pods-FYP/Pods-FYP.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,17 +33,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				38A853CF3E12F653B3580DFD /* Pods_FYP.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4A75BDD718821A3941D081EE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				55B67097AACE2079F5825738 /* Pods-FYP.debug.xcconfig */,
+				BAB4B71ABF290996F1AEC66D /* Pods-FYP.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		5D4F2CA521C0559398BF9D66 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A688C52E24BB2C1E7451A7D8 /* Pods_FYP.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		98CF7B5A1E23719F00B35553 = {
 			isa = PBXGroup;
 			children = (
 				98CF7B651E23719F00B35553 /* FYP */,
 				98CF7B641E23719F00B35553 /* Products */,
+				4A75BDD718821A3941D081EE /* Pods */,
+				5D4F2CA521C0559398BF9D66 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -71,9 +95,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 98CF7B751E23719F00B35553 /* Build configuration list for PBXNativeTarget "FYP" */;
 			buildPhases = (
+				02DF893E2EC6B066A0F9080D /* [CP] Check Pods Manifest.lock */,
 				98CF7B5F1E23719F00B35553 /* Sources */,
 				98CF7B601E23719F00B35553 /* Frameworks */,
 				98CF7B611E23719F00B35553 /* Resources */,
+				164E0A48019421C975C9F2C2 /* [CP] Embed Pods Frameworks */,
+				4355C14A85C92DCA5245A658 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -96,7 +123,7 @@
 				TargetAttributes = {
 					98CF7B621E23719F00B35553 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = D57GAYPBN3;
+						DevelopmentTeam = 864XSL2U7M;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -131,6 +158,54 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		02DF893E2EC6B066A0F9080D /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		164E0A48019421C975C9F2C2 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-FYP/Pods-FYP-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4355C14A85C92DCA5245A658 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-FYP/Pods-FYP-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		98CF7B5F1E23719F00B35553 /* Sources */ = {
@@ -257,9 +332,11 @@
 		};
 		98CF7B761E23719F00B35553 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 55B67097AACE2079F5825738 /* Pods-FYP.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = D57GAYPBN3;
+				DEVELOPMENT_TEAM = 864XSL2U7M;
 				INFOPLIST_FILE = FYP/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jsnh.FYP;
@@ -270,9 +347,11 @@
 		};
 		98CF7B771E23719F00B35553 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BAB4B71ABF290996F1AEC66D /* Pods-FYP.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = D57GAYPBN3;
+				DEVELOPMENT_TEAM = 864XSL2U7M;
 				INFOPLIST_FILE = FYP/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jsnh.FYP;
@@ -300,6 +379,7 @@
 				98CF7B771E23719F00B35553 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

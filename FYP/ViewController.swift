@@ -13,6 +13,8 @@ import CoreMotion
 import CoreLocation
 // video
 import AVFoundation
+// real time debugging
+import SocketIO
 
 
 extension Date {
@@ -59,10 +61,15 @@ AVCaptureFileOutputRecordingDelegate
     @IBOutlet var magnetic_heading: UITextView!
     
     @IBOutlet var btn_start: UIButton!
+    @IBOutlet var btn_begin_session: UIButton!
     
     @IBOutlet var switch_show: UISwitch!
     
     @IBOutlet var label_recording: UILabel!
+    
+    @IBOutlet var label_video_write: UILabel!
+    @IBOutlet var switch_video_write: UISwitch!
+    
     var timerObj: Timer!
     
     var IS_RECORDING: Bool! = false
@@ -92,6 +99,13 @@ AVCaptureFileOutputRecordingDelegate
         self.magnetic_heading.isHidden = false
     }
     
+    @IBAction func switchVideoRecording(_ sender: Any) {
+        if (self.switch_video_write.isOn) {
+            self.label_video_write.isHidden = false
+        } else {
+            self.label_video_write.isHidden = true
+        }
+    }
     @IBAction func switchFlipped(_ sender: Any) {
         if (self.switch_show.isOn) {
             showNums()
@@ -103,11 +117,23 @@ AVCaptureFileOutputRecordingDelegate
     // video part
     @IBOutlet var camView: UIView!
     
-    var captureSession = AVCaptureSession()
-    var previewLayer = AVCaptureVideoPreviewLayer()
-    var videoFileOutput = AVCaptureMovieFileOutput()
+//    var captureSession = AVCaptureSession()
+//    var previewLayer = AVCaptureVideoPreviewLayer()
+//    var videoFileOutput = AVCaptureMovieFileOutput()
     
-    override func viewWillAppear(_ animated: Bool) {
+    var captureSession: AVCaptureSession!
+    var previewLayer: AVCaptureVideoPreviewLayer!
+    var videoFileOutput: AVCaptureMovieFileOutput!
+    
+    @IBAction func beginCaptureSession(_ sender: Any) {
+        
+        self.captureSession = AVCaptureSession()
+        self.previewLayer = AVCaptureVideoPreviewLayer()
+        self.videoFileOutput = AVCaptureMovieFileOutput()
+        
+        // camera starts refressing
+        self.captureSession.startRunning()
+        
         captureSession.sessionPreset = AVCaptureSessionPresetHigh
         
         let deviceDiscoverySession = AVCaptureDeviceDiscoverySession(deviceTypes: [AVCaptureDeviceType.builtInDualCamera, AVCaptureDeviceType.builtInTelephotoCamera, AVCaptureDeviceType.builtInWideAngleCamera], mediaType: AVMediaTypeVideo, position: AVCaptureDevicePosition.unspecified)
@@ -121,7 +147,17 @@ AVCaptureFileOutputRecordingDelegate
                 }
             }
         }
+        
+        self.switch_show.isHidden = false
+        self.btn_start.isHidden = false
+        self.label_recording.isHidden = false
+        self.btn_begin_session.isHidden = true
     }
+//    override func viewWillAppear(_ animated: Bool) {
+//         set orientation of device to landscapeleft
+//        let value = UIInterfaceOrientation.landscapeLeft.rawValue
+//        UIDevice.current.setValue(value, forKey: "orientation")
+//    }
     
     func beginSession(captureDevice: AVCaptureDevice) {
         do {
@@ -132,7 +168,7 @@ AVCaptureFileOutputRecordingDelegate
         print("debug: started session")
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
-        previewLayer.connection.videoOrientation = AVCaptureVideoOrientation.portrait
+        previewLayer.connection.videoOrientation = AVCaptureVideoOrientation.landscapeRight
         previewLayer.frame = self.camView.layer.frame
         self.camView.layer.addSublayer(previewLayer)
         self.camView.bringSubview(toFront: self.imu_motion_yaw)
@@ -142,8 +178,18 @@ AVCaptureFileOutputRecordingDelegate
         self.camView.bringSubview(toFront: self.btn_start)
         self.camView.bringSubview(toFront: self.label_recording)
         self.camView.bringSubview(toFront: self.switch_show)
+        self.camView.bringSubview(toFront: self.switch_video_write)
+        self.camView.bringSubview(toFront: self.label_video_write)
         
         self.captureSession.addOutput(videoFileOutput)
+    }
+    
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.landscapeRight
+    }
+    
+    override var shouldAutorotate: Bool {
+        return true
     }
     
     func recordVideo() {
@@ -157,11 +203,34 @@ AVCaptureFileOutputRecordingDelegate
         }
     }
     
+    var socket: SocketIOClient!
+    
+    func initSocketConnection() {
+        self.socket = SocketIOClient(socketURL: URL(string: "http://147.8.115.59:3000")!, config: [.log(true), .forcePolling(true)])
+        
+        self.socket.on("connect") {data, ack in
+            print("socket connected")
+        }
+        
+//        self.socket.on("currentAmount") {data, ack in
+//            if let cur = data[0] as? Double {
+//                self.socket.emitWithAck("canUpdate", cur).timingOut(after: 0) {data in
+//                    self.socket.emit("update", ["amount": cur + 2.50])
+//                }
+//                
+//                ack.with("Got your currentAmount", "dude")
+//            }
+//        }
+        
+        self.socket.connect()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
         // initialize IS_RECORDING and hide recording label
+        
         self.IS_RECORDING = false
         self.label_recording.isHidden = true
         
@@ -169,14 +238,16 @@ AVCaptureFileOutputRecordingDelegate
         self.switch_show.setOn(false, animated: true)
         hideNums()
         
-        // camera starts refressing
-        self.captureSession.startRunning()
-        
         self.motionManager = CMMotionManager()
         self.locManager = CLLocationManager()
         
         self.moveArr = [[Double]]()
         
+        self.switch_show.isHidden = true
+        self.btn_start.isHidden = true
+        self.label_recording.isHidden = true
+        
+        initSocketConnection()
     }
     
     override func didReceiveMemoryWarning() {
@@ -250,6 +321,8 @@ AVCaptureFileOutputRecordingDelegate
         self.imu_motion_pitch.text = String(format:"%f", y)
         self.imu_motion_yaw.text = String(format:"%f", z)
         
+        self.socket.emit("imu", [x,y,z])
+        
         // record movement data in the array
         self.moveArr.append([x, y, z])
     }
@@ -305,7 +378,9 @@ AVCaptureFileOutputRecordingDelegate
             self.startUpdates()
             
             // start videoRecording
-            self.recordVideo()
+            if (self.switch_video_write.isOn) {
+                self.recordVideo()
+            }
         }
     }
     

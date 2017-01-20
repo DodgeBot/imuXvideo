@@ -152,6 +152,9 @@ AVCaptureFileOutputRecordingDelegate
         self.btn_start.isHidden = false
         self.label_recording.isHidden = false
         self.btn_begin_session.isHidden = true
+        self.btn_sock_conn.isHidden = false
+        self.switch_video_write.isHidden = false
+        self.label_video_write.isHidden = false
     }
 //    override func viewWillAppear(_ animated: Bool) {
 //         set orientation of device to landscapeleft
@@ -180,6 +183,7 @@ AVCaptureFileOutputRecordingDelegate
         self.camView.bringSubview(toFront: self.switch_show)
         self.camView.bringSubview(toFront: self.switch_video_write)
         self.camView.bringSubview(toFront: self.label_video_write)
+        self.camView.bringSubview(toFront: self.btn_sock_conn)
         
         self.captureSession.addOutput(videoFileOutput)
     }
@@ -204,23 +208,45 @@ AVCaptureFileOutputRecordingDelegate
     }
     
     var socket: SocketIOClient!
+    @IBOutlet var btn_sock_conn: UIButton!
+    var sock_ip_port: String = "http://"
+    var is_sock_connected: Bool = false
     
-    func initSocketConnection() {
-        self.socket = SocketIOClient(socketURL: URL(string: "http://147.8.115.59:3000")!, config: [.log(true), .forcePolling(true)])
+    @IBAction func connect_sock(_ sender: Any) {
+        // let is_sock_connected = self.btn_sock_conn.currentTitle == "Connected"
+        
+        if self.is_sock_connected {
+            self.socket.disconnect()
+        } else {
+            let alert = UIAlertController(title: "IP:Port", message: "", preferredStyle: .alert)
+            
+            alert.addTextField(configurationHandler: { (textFiled) in
+                textFiled.text = self.sock_ip_port
+            })
+            
+            alert.addAction(UIAlertAction(title: "Connect", style: .default, handler: { [weak alert] (_) in
+                let textField = alert?.textFields![0]
+                print("Text field: \(textField?.text)")
+                self.sock_ip_port = (textField?.text)!
+                self.initSocketConnection(addr: self.sock_ip_port)
+            }))
+            
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    func initSocketConnection(addr: String) {
+        self.socket = SocketIOClient(socketURL: URL(string: addr)!, config: [.log(true), .forcePolling(true)])
         
         self.socket.on("connect") {data, ack in
-            print("socket connected")
+            self.btn_sock_conn.setTitle("Disconnect", for: .normal)
+            self.is_sock_connected = true
         }
         
-//        self.socket.on("currentAmount") {data, ack in
-//            if let cur = data[0] as? Double {
-//                self.socket.emitWithAck("canUpdate", cur).timingOut(after: 0) {data in
-//                    self.socket.emit("update", ["amount": cur + 2.50])
-//                }
-//                
-//                ack.with("Got your currentAmount", "dude")
-//            }
-//        }
+        self.socket.on("disconnect") {data, ack in
+            self.btn_sock_conn.setTitle("Connect", for: .normal)
+            self.is_sock_connected = false
+        }
         
         self.socket.connect()
     }
@@ -247,7 +273,9 @@ AVCaptureFileOutputRecordingDelegate
         self.btn_start.isHidden = true
         self.label_recording.isHidden = true
         
-        initSocketConnection()
+        self.switch_video_write.isHidden = true
+        self.label_video_write.isHidden = true
+        self.btn_sock_conn.isHidden = true
     }
     
     override func didReceiveMemoryWarning() {
@@ -339,14 +367,17 @@ AVCaptureFileOutputRecordingDelegate
             self.finishDateTime = Date().iso8601
             self.finishTimeStamp = Int(Date().timeIntervalSince1970)
             
-            // stop video recording
-            self.videoFileOutput.stopRecording()
+            // write to file, comment if testing functionality
+            if (self.switch_video_write.isOn) {
+                // write imu data to file
+                self.writeToFile()
+                
+                // stop video recording
+                self.videoFileOutput.stopRecording()
+            }
             
             // stop imu updates
             self.stopUpdates()
-            
-            // write to file, comment if testing functionality
-            self.writeToFile()
             
             // clear movedata after exporting
             self.moveArr.removeAll()
